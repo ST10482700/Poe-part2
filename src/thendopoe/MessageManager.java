@@ -71,7 +71,7 @@ public class MessageManager {
         try (FileReader reader = new FileReader(filePath)) {
             Object obj = parser.parse(reader);
             JSONArray jsonList = (JSONArray) obj;
-            
+
             storedMessages.clear();
             for (Object item : jsonList) {
                 JSONObject jsonMsg = (JSONObject) item;
@@ -86,14 +86,26 @@ public class MessageManager {
     }
 
     public String getLongestStoredMessage() {
-        if (storedMessages.isEmpty()) return "No stored messages found.";
+        if (storedMessages.isEmpty()) {
+            return "No stored messages found.";
+        }
+
         String longest = storedMessages.get(0);
         for (String msg : storedMessages) {
             if (msg.length() > longest.length()) {
                 longest = msg;
             }
         }
-        return longest;
+
+        int index = allMessages.indexOf(longest);
+        String id = (index != -1 && index < messageIds.size()) ? messageIds.get(index) : "N/A";
+        String rec = (index != -1 && index < recipients.size()) ? recipients.get(index) : "Unknown";
+        String hash = (index != -1 && index < messageHashes.size()) ? messageHashes.get(index) : "N/A";
+
+        return "Message ID: " + id
+                + " | Recipient: " + rec
+                + " | Hash: " + hash
+                + " | Message: \"" + longest + "\"";
     }
 
     public String searchByMessageId(String targetId) {
@@ -143,6 +155,12 @@ public class MessageManager {
                   .append(" | Message: \"").append(msg).append("\"\n");
         }
         return report.toString();
+    }
+
+    public void addNewMessage(String recipient, String text) {
+        sentMessages.add("To: " + recipient + " | Message: " + text);
+        recipients.add(recipient);
+        allMessages.add(text);
     }
 
     public List<String> getSentMessages() { return sentMessages; }
